@@ -1,0 +1,28 @@
+<template name="lmImagePicker">
+  <div class='lm-image-picker-btns'>
+    {{ #if data.types.upload }}
+      <div class='lm-image-picker-btn-upload {{data.classes.btns}}'>Upload</div>
+    {{ /if }}
+    {{ #if data.types.camera }}
+      <div class='lm-image-picker-btn-camera {{data.classes.btns}}'>Camera</div>
+    {{ /if }}
+    {{ #if data.types.byUrl }}
+      <div class='lm-image-picker-btn-by-url {{data.classes.btns}}'>Url</div>
+    {{ /if }}
+  </div>
+
+  {{ #if data.currentTypes.byUrl }}
+    <div class='lm-image-picker-by-url-section'>
+      <label>Image URL (to a public image on the Internet)</label>
+      <input type='text' placeholder='https://example.com/image1.jpg' class='lm-image-picker-input-by-url' />
+      {{ #if data.errorByUrl }}
+        <div class='lm-image-picker-by-url-error'>{{ data.errorByUrl }}</div>
+      {{ /if }}
+    </div>
+  {{ /if }}
+  
+  <div class='lm-image-picker-image'>
+    <img width='{{ data.imageDisplay.width }}' height='{{ data.imageDisplay.height }}' />
+  </div>
+
+</template>
