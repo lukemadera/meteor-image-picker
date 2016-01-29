@@ -24,8 +24,7 @@ _imagePicker ={
       width: 800,
       height: 800
     },
-    // fileDir: '/'
-    fileDir: '/Users/lukemadera/Downloads',
+    fileDir: '',
     quality: '75'
   },
   Jcrop: null,

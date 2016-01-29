@@ -9,6 +9,7 @@ Meteor.methods({
 if(Meteor.isServer) {
   // var imageMagick = Npm.require("imagemagick");
   var fs = Npm.require('fs');
+  var path = Npm.require('path');
   var mime =Npm.require('mime');
 
   _imagePicker.base64ToFile =function(dataString, fileDir) {
@@ -33,7 +34,7 @@ if(Meteor.isServer) {
     var imageTypeDetected = fileData.type.match(imageTypeRegularExpression);
     var ext = imageTypeDetected[1];
 
-    var outputFilePath =fileDir + '/' + (Math.random() + 1).toString(36).substring(7)
+    var outputFilePath = path.resolve('.') + fileDir + '/' + (Math.random() + 1).toString(36).substring(7)
      + '.' + ext;
 
      // Save decoded binary image to disk
@@ -72,8 +73,6 @@ if(Meteor.isServer) {
     var filePath =fileInfo.outputFilePath;
     var ext =fileInfo.ext;
 
-    // var outputFilePath =imageData.fileDir + '/' + (Math.random() + 1).toString(36).substring(7)
-    //  + '.' + ext;
     var outputFilePathCrop =filePath;
     var outputFilePathResize =outputFilePathCrop;
 
