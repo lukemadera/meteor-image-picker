@@ -1,3 +1,6 @@
+.lm-image-picker-cont {
+  position: relative;
+}
 .lm-image-picker-btns {
   text-align: center;
 }
@@ -18,11 +21,18 @@
 .lm-image-picker-image-cont {
   text-align: center;
 }
-.lm-image-picker-image {
+.lm-image-picker-image, .lm-image-picker-image-dimensions {
   display: block;
   width: 100%;
 }
 .lm-image-picker-image-actual-dimensions {
   position: absolute;
   left: -9999px;
+}
+.lm-image-picker-image-save-btn {
+  text-align: center;
+  display: inline-block;
+  cursor: pointer;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

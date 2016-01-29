@@ -6,6 +6,7 @@ _imagePicker ={
     classes: {
       btns: 'lm-image-picker-btn-style',
       image: '',
+      imageConverted: '',
       imageCont: ''
     },
     types: {
@@ -18,10 +19,30 @@ _imagePicker ={
       minSize: [ 100, 100 ],
       // Can not set max if display size is different than actual.
       // maxSize: [ 800, 800 ]
-    }
+    },
+    resizeMax: {
+      width: 800,
+      height: 800
+    },
+    // fileDir: '/'
+    fileDir: '/Users/lukemadera/Downloads',
+    quality: '75'
   },
   Jcrop: null,
   imgDisplayData: { }
+};
+
+_imagePicker.saveImage =function(templateInst) {
+  var imageData = templateInst.imageData.get();
+  Meteor.call("lmImagePickerConvertImage", imageData, function(err, base64Data) {
+    if(_imagePicker.opts.onImageSaved) {
+      _imagePicker.opts.onImageSaved(null, base64Data);
+    }
+    _imagePicker.resetImage(templateInst);
+    // var imageData =templateInst.imageData.get();
+    // imageData.srcConverted = base64Data;
+    // templateInst.imageData.set(imageData);
+  });
 };
 
 _imagePicker.showImage =function(templateInst, imageUrl) {
@@ -50,20 +71,21 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
     templateInst.imageData.set({
       src: imageUrl
     });
-
-    // if(_imagePicker.opts.onImagePicked) {
-    //   _imagePicker.opts.onImagePicked(null, imageUrl);
-    // }
   }
 };
 
 _imagePicker.removeImage =function(templateInst) {
   templateInst.imageData.set({
-    src: ''
+    src: null
   });
   var ids =_imagePicker.formIds(templateInst);
   var imgEle = document.getElementById(ids.image);
   imgEle.src ='';
+  // Reset styles (that jcrop added?).
+  imgEle.style.width ='100%';
+  imgEle.style.height ='auto';
+  var imgEleDimensions = document.getElementById(ids.imageDimensions);
+  imgEleDimensions.src ='';
   if( _imagePicker.Jcrop ) {
     _imagePicker.Jcrop.destroy();
   }
@@ -73,7 +95,13 @@ _imagePicker.initJcrop =function(templateInst, imageSelector) {
   var showCoords =function(coords) {
     var imageData = templateInst.imageData.get();
     imageData.coords =_imagePicker.getAdjustedCropCoords(coords);
-    console.log(imageData);
+    imageData.dimensions = {
+      width: _imagePicker.imgDisplayData.actualWidth,
+      height: _imagePicker.imgDisplayData.actualHeight
+    };
+    imageData.resizeMax =_imagePicker.opts.resizeMax;
+    imageData.fileDir =_imagePicker.opts.fileDir;
+    imageData.quality =_imagePicker.opts.quality;
     templateInst.imageData.set(imageData);
   };
 
@@ -101,7 +129,6 @@ _imagePicker.getAdjustedCropCoords = function(coords) {
     width: Math.round( coords.w * xRatio ),
     height: Math.round( coords.h * yRatio )
   };
-  // console.log(xRatio, yRatio, coords, adjustedCoords);
   return adjustedCoords;
 };
 
@@ -203,6 +230,20 @@ _imagePicker.fileToDataUrl =function(file, callback) {
   _imagePicker.readFileChunksToBase64(file, file.type, callback);
 };
 
+_imagePicker.fileUrlToBase64 =function(fileUrl, callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'blob';
+  xhr.onload = function() {
+    var reader  = new FileReader();
+    reader.onloadend = function () {
+      callback(null, reader.result);
+    }
+    reader.readAsDataURL(xhr.response);
+  };
+  xhr.open('GET', fileUrl);
+  xhr.send();
+};
+
 _imagePicker.isImageExtension =function(src) {
   var ret ={
     valid: true,
@@ -244,8 +285,16 @@ _imagePicker.formIds =function(templateInst) {
   var instId = templateInst.instId.get();
   return {
     image: instId + 'Image',
-    imageDimensions: instId + 'ImageDimensions'
+    imageDimensions: instId + 'ImageDimensions',
+    imageConverted: instId + 'ImageConverted'
   };
+};
+
+_imagePicker.resetImage =function(templateInst) {
+  templateInst.currentType.set(null);
+  templateInst.errorByUrl.set(null);
+  templateInst.errorUpload.set(null);
+  _imagePicker.removeImage(templateInst);
 };
 
 if(Meteor.isClient) {
@@ -338,14 +387,20 @@ if(Meteor.isClient) {
       _imagePicker.removeImage(template);
     },
     'change .lm-image-picker-input-by-url, blur .lm-image-picker-input-by-url': function(evt, template) {
+      var templateInst =template;
       var val =evt.target.value;
       var validate =_imagePicker.isImageExtension(val);
       if( !validate.valid ) {
         template.errorByUrl.set(validate.message);
       }
       else {
-        _imagePicker.showImage(template, val);
+        _imagePicker.fileUrlToBase64(val, function(err, data) {
+          _imagePicker.showImage(templateInst, data);
+        });
       }
+    },
+    'click .lm-image-picker-image-save-btn': function(evt, template) {
+      _imagePicker.saveImage(template);
     }
   });
 

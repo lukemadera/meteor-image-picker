@@ -16,6 +16,12 @@ Package.onUse(function(api) {
   api.use('blaze@2.0.0');
   api.use('reactive-var@1.0.5');
   api.use('mdg:camera@1.2.0');
+  api.use('classcraft:imagemagick@0.9.1');
+
+  Npm.depends({
+    // "imagemagick": "0.1.3"
+    "mime": "1.3.4"
+  });
 
   api.addFiles([
     'lib/Jcrop/jquery.Jcrop.min.css',
@@ -24,7 +30,8 @@ Package.onUse(function(api) {
     'image-picker.css',
   ], 'client');
   api.addFiles([
-    'image-picker.js'
+    'image-picker.js',
+    'image-picker-imagemagick.js'
   ]);
   api.addAssets([
     'lib/Jcrop/Jcrop.gif'

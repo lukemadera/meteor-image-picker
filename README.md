@@ -19,6 +19,18 @@ Pick image from camera (capture), file upload or by URL, cross platform (Web, Co
 
 ## Installation
 
+## ImageMagick
+
+Install ImageMagick on your server:
+
+http://www.imagemagick.org/script/binary-releases.php
+
+And / or google the operating system you're trying to install on to get
+ instructions.
+
+Check if it is installed by typing: `convert` on the command line.
+
+
 In a Meteor app directory:
 ```bash
 meteor add lukemadera:image-picker

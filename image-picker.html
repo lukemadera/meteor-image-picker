@@ -1,40 +1,48 @@
 <template name="lmImagePicker">
-  <div class='lm-image-picker-btns'>
-    {{ #if data.types.upload }}
-      <div class='lm-image-picker-btn-upload {{data.classes.btns}}'>Upload</div>
-    {{ /if }}
-    {{ #if data.types.camera }}
-      <div class='lm-image-picker-btn-camera {{data.classes.btns}}'>Camera</div>
-    {{ /if }}
-    {{ #if data.types.byUrl }}
-      <div class='lm-image-picker-btn-by-url {{data.classes.btns}}'>Url</div>
-    {{ /if }}
-  </div>
-
-  {{ #if data.showUploadInput }}
-    <div class='lm-image-picker-upload-section'>
-      <input type='file' placeholder='Choose a file' accept="image/*" class='lm-image-picker-input-upload' />
-      {{ #if data.errorUpload }}
-        <div class='lm-image-picker-upload-error'>{{ data.errorUpload }}</div>
+  <div class='lm-image-picker-cont'>
+    <div class='lm-image-picker-btns'>
+      {{ #if data.types.upload }}
+        <div class='lm-image-picker-btn-upload {{data.classes.btns}}'>Upload</div>
+      {{ /if }}
+      {{ #if data.types.camera }}
+        <div class='lm-image-picker-btn-camera {{data.classes.btns}}'>Camera</div>
+      {{ /if }}
+      {{ #if data.types.byUrl }}
+        <div class='lm-image-picker-btn-by-url {{data.classes.btns}}'>Url</div>
       {{ /if }}
     </div>
-  {{ /if }}
 
-  {{ #if data.currentTypes.byUrl }}
-    <div class='lm-image-picker-by-url-section'>
-      <label>Image URL (to a public image on the Internet)</label>
-      <input type='text' placeholder='https://example.com/image1.jpg' class='lm-image-picker-input-by-url' />
-      {{ #if data.errorByUrl }}
-        <div class='lm-image-picker-by-url-error'>{{ data.errorByUrl }}</div>
+    {{ #if data.showUploadInput }}
+      <div class='lm-image-picker-upload-section'>
+        <input type='file' placeholder='Choose a file' accept="image/*" class='lm-image-picker-input-upload' />
+        {{ #if data.errorUpload }}
+          <div class='lm-image-picker-upload-error'>{{ data.errorUpload }}</div>
+        {{ /if }}
+      </div>
+    {{ /if }}
+
+    {{ #if data.currentTypes.byUrl }}
+      <div class='lm-image-picker-by-url-section'>
+        <label>Image URL (to a public image on the Internet)</label>
+        <input type='text' placeholder='https://example.com/image1.jpg' class='lm-image-picker-input-by-url' />
+        {{ #if data.errorByUrl }}
+          <div class='lm-image-picker-by-url-error'>{{ data.errorByUrl }}</div>
+        {{ /if }}
+      </div>
+    {{ /if }}
+
+    <div class='lm-image-picker-image-cont {{ data.classes.imageCont }}'>
+      {{ #if data.imageData.src }}
+        <!-- <div>
+          <img id='{{ data.ids.imageConverted }}' src='{{ data.imageData.srcConverted }}' class='lm-image-picker-image-converted {{ data.classes.imageConverted }}' />
+        </div> -->
+        <div>Click and drag on the image to crop, then hit Save below.</div>
+        <div class='lm-image-picker-image-save-btn'>Save</div>
       {{ /if }}
+      <img id='{{ data.ids.image }}' class='lm-image-picker-image {{ data.classes.image }}' />
     </div>
-  {{ /if }}
-  
-  <div class='lm-image-picker-image-cont {{ data.classes.imageCont }}'>
-    <img id='{{ data.ids.image }}' class='lm-image-picker-image {{ data.classes.image }}' />
+    <div class='lm-image-picker-image-actual-dimensions'>
+      <img id='{{ data.ids.imageDimensions }}' class='lm-image-picker-image-dimensions' />
+    </div>
   </div>
-  <div class='lm-image-picker-image-actual-dimensions'>
-    <img id='{{ data.ids.imageDimensions }}' />
-  </div>
-
 </template>
