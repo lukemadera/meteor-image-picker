@@ -18,11 +18,6 @@ Package.onUse(function(api) {
   api.use('mdg:camera@1.2.0');
   api.use('classcraft:imagemagick@0.9.1');
 
-  Npm.depends({
-    // "imagemagick": "0.1.3"
-    "mime": "1.3.4"
-  });
-
   api.addFiles([
     'lib/Jcrop/jquery.Jcrop.min.css',
     'lib/Jcrop/jquery.Jcrop.min.js',
@@ -38,6 +33,11 @@ Package.onUse(function(api) {
   ], 'client');
 
   api.export('lmImagePicker');
+});
+
+Npm.depends({
+  // "imagemagick": "0.1.3"
+  "mime": "1.3.4"
 });
 
 Package.onTest(function(api) {

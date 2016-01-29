@@ -5,6 +5,10 @@ Pick image from camera (capture), file upload or by URL, cross platform (Web, Co
 
 ## Demo
 
+NOTE: As ImageMagick is not available on free Meteor hosting, the final step
+ (after you click "Save") will error in the demo, so you can only demo the
+ image picker and cropping.
+
 [Demo](http://lukemadera-packages.meteor.com/image-picker-basic)
 
 [Source](https://github.com/lukemadera/meteor-packages/tree/master/image-picker/basic)
@@ -19,7 +23,7 @@ Pick image from camera (capture), file upload or by URL, cross platform (Web, Co
 
 ## Installation
 
-## ImageMagick
+### ImageMagick
 
 Install ImageMagick on your server:
 
