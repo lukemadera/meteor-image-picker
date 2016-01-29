@@ -7,14 +7,18 @@
   margin-left: 10px;
   margin-right: 10px;
 }
-.lm-image-picker-by-url-section {
+.lm-image-picker-upload-section, .lm-image-picker-by-url-section {
   padding-top: 5px;
   padding-bottom: 5px;
   text-align: center;
 }
-.lm-image-picker-by-url-section input {
+.lm-image-picker-upload-section input, .lm-image-picker-by-url-section input {
+  text-align: center;
+}
+.lm-image-picker-image-cont {
   text-align: center;
 }
 .lm-image-picker-image {
-  text-align: center;
+  display: block;
+  width: 100%;
 }

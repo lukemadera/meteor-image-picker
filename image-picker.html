@@ -11,6 +11,15 @@
     {{ /if }}
   </div>
 
+  {{ #if data.showUploadInput }}
+    <div class='lm-image-picker-upload-section'>
+      <input type='file' placeholder='Choose a file' accept="image/*" class='lm-image-picker-input-upload' />
+      {{ #if data.errorUpload }}
+        <div class='lm-image-picker-upload-error'>{{ data.errorUpload }}</div>
+      {{ /if }}
+    </div>
+  {{ /if }}
+
   {{ #if data.currentTypes.byUrl }}
     <div class='lm-image-picker-by-url-section'>
       <label>Image URL (to a public image on the Internet)</label>
@@ -21,8 +30,10 @@
     </div>
   {{ /if }}
   
-  <div class='lm-image-picker-image'>
-    <img width='{{ data.imageDisplay.width }}' height='{{ data.imageDisplay.height }}' />
-  </div>
+  {{ #if data.imageData.src }}
+    <div class='lm-image-picker-image-cont {{ data.classes.imageCont }}'>
+      <img src='{{ data.imageData.src }}' class='lm-image-picker-image {{ data.classes.image }}' />
+    </div>
+  {{ /if }}
 
 </template>

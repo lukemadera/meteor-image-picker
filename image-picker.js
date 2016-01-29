@@ -2,12 +2,10 @@ lmImagePicker ={};
 
 _imagePicker ={
   optsDefaults: {
-    imageDisplay: {
-      width: 300,
-      height: 230
-    },
     classes: {
-      btns: 'lm-image-picker-btn-style'
+      btns: 'lm-image-picker-btn-style',
+      image: '',
+      imageCont: ''
     },
     types: {
       upload: true,
@@ -17,9 +15,10 @@ _imagePicker ={
   }
 };
 
-_imagePicker.showImage =function(imageUrl) {
-  var ele = document.querySelector('img');
-  ele.src = imageUrl;
+_imagePicker.showImage =function(templateInst, imageUrl) {
+  templateInst.imageData.set({
+    src: imageUrl
+  });
   // if(_imagePicker.opts.onImagePicked) {
   //   _imagePicker.opts.onImagePicked(null, imageUrl);
   // }
@@ -166,6 +165,10 @@ if(Meteor.isClient) {
     this.inited =false;
     this.currentType = new ReactiveVar(null);
     this.errorByUrl = new ReactiveVar(null);
+    this.errorUpload = new ReactiveVar(null);
+    this.imageData = new ReactiveVar({
+      src: null
+    });
   };
 
   Template.lmImagePicker.helpers({
@@ -183,25 +186,55 @@ if(Meteor.isClient) {
         classes: _imagePicker.opts.classes,
         types: _imagePicker.opts.types,
         currentTypes: currentTypes,
-        errorByUrl: templateInst.errorByUrl.get()
+        errorByUrl: templateInst.errorByUrl.get(),
+        showUploadInput: ( currentTypes.upload && !Meteor.isCordova ) ?
+         true : false,
+        errorUpload: templateInst.errorUpload.get(),
+        imageData: templateInst.imageData.get()
       };
     }
   });
 
   Template.lmImagePicker.events({
     'click .lm-image-picker-btn-upload': function(evt, template) {
+      var templateInst =template;
+      _imagePicker.showImage(templateInst, null);
       template.currentType.set('upload');
-      // TODO
+      if( Meteor.isCordova ) {
+        var picOpts ={
+          sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY
+        };
+        MeteorCamera.getPicture(picOpts, function(err, data) {
+          _imagePicker.showImage(templateInst, data);
+        });
+      }
+    },
+    'change .lm-image-picker-input-upload, blur .lm-image-picker-input-upload': function(evt, template) {
+      var templateInst =template;
+      var val =evt.target.value;
+      var validate =_imagePicker.isImageExtension(val);
+      if( !validate.valid ) {
+        template.errorUpload.set(validate.message);
+      }
+      else {
+        var file =evt.target.files[0];
+        _imagePicker.readFileChunksToBase64(file, file.type, function(data) {
+          _imagePicker.showImage(templateInst, data);
+        });
+      }
     },
     'click .lm-image-picker-btn-camera': function(evt, template) {
+      var templateInst =template;
+      _imagePicker.showImage(templateInst, null);
       template.currentType.set('camera');
       // Need to set orienation for Android:
       // https://github.com/meteor/mobile-packages/issues/21
       MeteorCamera.getPicture({ correctOrientation: true }, function(err, data) {
-        _imagePicker.showImage(data);
+        _imagePicker.showImage(templateInst, data);
       });
     },
     'click .lm-image-picker-btn-by-url': function(evt, template) {
+      _imagePicker.showImage(template, null);
       template.currentType.set('byUrl');
     },
     'change .lm-image-picker-input-by-url, blur .lm-image-picker-input-by-url': function(evt, template) {
@@ -211,7 +244,7 @@ if(Meteor.isClient) {
         template.errorByUrl.set(validate.message);
       }
       else {
-        _imagePicker.showImage(val);
+        _imagePicker.showImage(template, val);
       }
     }
   });

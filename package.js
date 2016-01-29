@@ -18,12 +18,17 @@ Package.onUse(function(api) {
   api.use('mdg:camera@1.2.0');
 
   api.addFiles([
+    'lib/Jcrop/jquery.Jcrop.min.css',
+    'lib/Jcrop/jquery.Jcrop.min.js',
     'image-picker.html',
     'image-picker.css',
   ], 'client');
   api.addFiles([
     'image-picker.js'
   ]);
+  api.addAssets([
+    'lib/Jcrop/Jcrop.gif'
+  ], 'client');
 
   api.export('lmImagePicker');
 });
