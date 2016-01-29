@@ -30,10 +30,11 @@
     </div>
   {{ /if }}
   
-  {{ #if data.imageData.src }}
-    <div class='lm-image-picker-image-cont {{ data.classes.imageCont }}'>
-      <img src='{{ data.imageData.src }}' class='lm-image-picker-image {{ data.classes.image }}' />
-    </div>
-  {{ /if }}
+  <div class='lm-image-picker-image-cont {{ data.classes.imageCont }}'>
+    <img id='{{ data.ids.image }}' class='lm-image-picker-image {{ data.classes.image }}' />
+  </div>
+  <div class='lm-image-picker-image-actual-dimensions'>
+    <img id='{{ data.ids.imageDimensions }}' />
+  </div>
 
 </template>

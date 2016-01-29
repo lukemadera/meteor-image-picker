@@ -1,6 +1,7 @@
 lmImagePicker ={};
 
 _imagePicker ={
+  opts: {},
   optsDefaults: {
     classes: {
       btns: 'lm-image-picker-btn-style',
@@ -11,17 +12,97 @@ _imagePicker ={
       upload: true,
       camera: true,
       byUrl: true
+    },
+    JcropOpts: {
+      aspectRatio: 1,
+      minSize: [ 100, 100 ],
+      // Can not set max if display size is different than actual.
+      // maxSize: [ 800, 800 ]
     }
-  }
+  },
+  Jcrop: null,
+  imgDisplayData: { }
 };
 
 _imagePicker.showImage =function(templateInst, imageUrl) {
+  var imageData =templateInst.imageData.get();
+  if( imageData.src !== imageUrl ) {
+    var ids =_imagePicker.formIds(templateInst);
+
+    // Need to load a SECOND image that has NO set height and width
+    // to get the ACTUAL image dimensions.
+    var imgEleDimensions = document.getElementById(ids.imageDimensions);
+    imgEleDimensions.onload = function() {
+      _imagePicker.imgDisplayData.actualHeight =imgEleDimensions.height;
+      _imagePicker.imgDisplayData.actualWidth =imgEleDimensions.width;
+    };
+    imgEleDimensions.src =imageUrl;
+
+    // Can not initialize jcrop until image has loaded.
+    var imgEle = document.getElementById(ids.image);
+    imgEle.onload = function() {
+      _imagePicker.imgDisplayData.displayHeight =imgEle.height;
+      _imagePicker.imgDisplayData.displayWidth =imgEle.width;
+      _imagePicker.initJcrop(templateInst, '#'+ids.image);
+    };
+    imgEle.src =imageUrl;
+
+    templateInst.imageData.set({
+      src: imageUrl
+    });
+
+    // if(_imagePicker.opts.onImagePicked) {
+    //   _imagePicker.opts.onImagePicked(null, imageUrl);
+    // }
+  }
+};
+
+_imagePicker.removeImage =function(templateInst) {
   templateInst.imageData.set({
-    src: imageUrl
+    src: ''
   });
-  // if(_imagePicker.opts.onImagePicked) {
-  //   _imagePicker.opts.onImagePicked(null, imageUrl);
-  // }
+  var ids =_imagePicker.formIds(templateInst);
+  var imgEle = document.getElementById(ids.image);
+  imgEle.src ='';
+  if( _imagePicker.Jcrop ) {
+    _imagePicker.Jcrop.destroy();
+  }
+};
+
+_imagePicker.initJcrop =function(templateInst, imageSelector) {
+  var showCoords =function(coords) {
+    var imageData = templateInst.imageData.get();
+    imageData.coords =_imagePicker.getAdjustedCropCoords(coords);
+    console.log(imageData);
+    templateInst.imageData.set(imageData);
+  };
+
+  var JcropOpts =_imagePicker.opts.JcropOpts;
+  JcropOpts.onSelect = showCoords;
+
+  $(imageSelector).Jcrop(JcropOpts, function() {
+    _imagePicker.Jcrop =this;
+  });
+};
+
+// The displayed image may have "width 100%" or a set width or height
+// so the crop coordinates will be relative to the display size, not the
+// ACTUAL size. So we need to adjust them to the actual size.
+_imagePicker.getAdjustedCropCoords = function(coords) {
+  var xRatio = _imagePicker.imgDisplayData.actualWidth /
+   _imagePicker.imgDisplayData.displayWidth;
+  var yRatio = _imagePicker.imgDisplayData.actualHeight /
+   _imagePicker.imgDisplayData.displayHeight;
+  var adjustedCoords ={
+    x1: Math.round( coords.x * xRatio ),
+    x2: Math.round( coords.x2 * xRatio ),
+    y1: Math.round( coords.y * yRatio ),
+    y2: Math.round( coords.y2 * yRatio ),
+    width: Math.round( coords.w * xRatio ),
+    height: Math.round( coords.h * yRatio )
+  };
+  // console.log(xRatio, yRatio, coords, adjustedCoords);
+  return adjustedCoords;
 };
 
 /**
@@ -159,6 +240,14 @@ _imagePicker.init =function(templateInst) {
   }
 };
 
+_imagePicker.formIds =function(templateInst) {
+  var instId = templateInst.instId.get();
+  return {
+    image: instId + 'Image',
+    imageDimensions: instId + 'ImageDimensions'
+  };
+};
+
 if(Meteor.isClient) {
 
   Template.lmImagePicker.created =function() {
@@ -169,6 +258,7 @@ if(Meteor.isClient) {
     this.imageData = new ReactiveVar({
       src: null
     });
+    this.instId = new ReactiveVar((Math.random() + 1).toString(36).substring(7));
   };
 
   Template.lmImagePicker.helpers({
@@ -182,6 +272,7 @@ if(Meteor.isClient) {
         byUrl: ( currentType === 'byUrl' ) ? true : false,
       };
       return {
+        ids: _imagePicker.formIds(templateInst),
         imageDisplay: _imagePicker.opts.imageDisplay,
         classes: _imagePicker.opts.classes,
         types: _imagePicker.opts.types,
@@ -198,7 +289,7 @@ if(Meteor.isClient) {
   Template.lmImagePicker.events({
     'click .lm-image-picker-btn-upload': function(evt, template) {
       var templateInst =template;
-      _imagePicker.showImage(templateInst, null);
+      _imagePicker.removeImage(templateInst);
       template.currentType.set('upload');
       if( Meteor.isCordova ) {
         var picOpts ={
@@ -209,7 +300,12 @@ if(Meteor.isClient) {
         });
       }
     },
-    'change .lm-image-picker-input-upload, blur .lm-image-picker-input-upload': function(evt, template) {
+    // Need to clear image otherwise it will not change on new selection.
+    'focus .lm-image-picker-input-upload': function(evt, template) {
+      _imagePicker.removeImage(template);
+    },
+    // 'change .lm-image-picker-input-upload, blur .lm-image-picker-input-upload': function(evt, template) {
+    'change .lm-image-picker-input-upload': function(evt, template) {
       var templateInst =template;
       var val =evt.target.value;
       var validate =_imagePicker.isImageExtension(val);
@@ -225,7 +321,7 @@ if(Meteor.isClient) {
     },
     'click .lm-image-picker-btn-camera': function(evt, template) {
       var templateInst =template;
-      _imagePicker.showImage(templateInst, null);
+      _imagePicker.removeImage(templateInst);
       template.currentType.set('camera');
       // Need to set orienation for Android:
       // https://github.com/meteor/mobile-packages/issues/21
@@ -234,8 +330,12 @@ if(Meteor.isClient) {
       });
     },
     'click .lm-image-picker-btn-by-url': function(evt, template) {
-      _imagePicker.showImage(template, null);
+      _imagePicker.removeImage(template);
       template.currentType.set('byUrl');
+    },
+    // Need to clear image otherwise it will not change on new selection.
+    'focus .lm-image-picker-input-by-url': function(evt, template) {
+      _imagePicker.removeImage(template);
     },
     'change .lm-image-picker-input-by-url, blur .lm-image-picker-input-by-url': function(evt, template) {
       var val =evt.target.value;

@@ -22,3 +22,7 @@
   display: block;
   width: 100%;
 }
+.lm-image-picker-image-actual-dimensions {
+  position: absolute;
+  left: -9999px;
+}
