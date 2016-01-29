@@ -37,7 +37,7 @@
           <img id='{{ data.ids.imageConverted }}' src='{{ data.imageData.srcConverted }}' class='lm-image-picker-image-converted {{ data.classes.imageConverted }}' />
         </div> -->
         <div>Click and drag on the image to crop, then hit Save below.</div>
-        <div class='lm-image-picker-image-save-btn'>Save</div>
+        <div class='lm-image-picker-image-save-btn {{data.classes.saveBtn}}'>Save</div>
       {{ /if }}
       <img id='{{ data.ids.image }}' class='lm-image-picker-image {{ data.classes.image }}' />
     </div>

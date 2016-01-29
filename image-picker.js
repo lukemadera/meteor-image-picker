@@ -7,7 +7,8 @@ _imagePicker ={
       btns: 'lm-image-picker-btn-style',
       image: '',
       imageConverted: '',
-      imageCont: ''
+      imageCont: '',
+      saveBtn: ''
     },
     types: {
       upload: true,
