@@ -39,9 +39,6 @@ _imagePicker.saveImage =function(templateInst) {
       _imagePicker.opts.onImageSaved(null, base64Data);
     }
     _imagePicker.resetImage(templateInst);
-    // var imageData =templateInst.imageData.get();
-    // imageData.srcConverted = base64Data;
-    // templateInst.imageData.set(imageData);
   });
 };
 
@@ -54,8 +51,27 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
     // to get the ACTUAL image dimensions.
     var imgEleDimensions = document.getElementById(ids.imageDimensions);
     imgEleDimensions.onload = function() {
-      _imagePicker.imgDisplayData.actualHeight =imgEleDimensions.height;
       _imagePicker.imgDisplayData.actualWidth =imgEleDimensions.width;
+      _imagePicker.imgDisplayData.actualHeight =imgEleDimensions.height;
+
+      templateInst.imageData.set({
+        src: imageUrl,
+        resizeMax: _imagePicker.opts.resizeMax,
+        fileDir: _imagePicker.opts.fileDir,
+        quality: _imagePicker.opts.quality,
+        dimenions: {
+          width: imgEleDimensions.width,
+          height: imgEleDimensions.height
+        },
+        coords: {
+          x1: 0,
+          x2: imgEleDimensions.width,
+          y1: 0,
+          y2: imgEleDimensions.height,
+          width: imgEleDimensions.width,
+          height: imgEleDimensions.height
+        }
+      });
     };
     imgEleDimensions.src =imageUrl;
 
@@ -67,10 +83,6 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
       _imagePicker.initJcrop(templateInst, '#'+ids.image);
     };
     imgEle.src =imageUrl;
-
-    templateInst.imageData.set({
-      src: imageUrl
-    });
   }
 };
 
@@ -95,13 +107,6 @@ _imagePicker.initJcrop =function(templateInst, imageSelector) {
   var showCoords =function(coords) {
     var imageData = templateInst.imageData.get();
     imageData.coords =_imagePicker.getAdjustedCropCoords(coords);
-    imageData.dimensions = {
-      width: _imagePicker.imgDisplayData.actualWidth,
-      height: _imagePicker.imgDisplayData.actualHeight
-    };
-    imageData.resizeMax =_imagePicker.opts.resizeMax;
-    imageData.fileDir =_imagePicker.opts.fileDir;
-    imageData.quality =_imagePicker.opts.quality;
     templateInst.imageData.set(imageData);
   };
 
