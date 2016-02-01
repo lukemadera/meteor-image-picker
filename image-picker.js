@@ -4,7 +4,8 @@ _imagePicker ={
   opts: {},
   optsDefaults: {
     classes: {
-      btns: 'lm-image-picker-btn-style',
+      btns: '',
+      btn: 'lm-image-picker-btn-style',
       image: '',
       imageConverted: '',
       imageCont: '',
@@ -31,6 +32,24 @@ _imagePicker ={
   Jcrop: null,
   imgDisplayData: { }
 };
+
+Meteor.methods({
+  lmImagePickerGetFileByUrl: function(fileUrl) {
+    if(Meteor.isServer) {
+      return _imagePicker.getFileByUrl(fileUrl);
+    }
+  }
+});
+
+if(Meteor.isServer) {
+  _imagePicker.getFileByUrl =function(fileUrl) {
+    // http://stackoverflow.com/questions/27172459/i-am-unable-to-convert-http-get-image-into-base-64
+    var response = HTTP.call('GET', fileUrl, { npmRequestOptions: { encoding: null } });
+    var data = "data:" + response.headers["content-type"] + ";base64," +
+     new Buffer(response.content).toString('base64');
+    return data;
+  };
+}
 
 _imagePicker.saveImage =function(templateInst) {
   var imageData = templateInst.imageData.get();
@@ -236,17 +255,22 @@ _imagePicker.fileToDataUrl =function(file, callback) {
 };
 
 _imagePicker.fileUrlToBase64 =function(fileUrl, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.responseType = 'blob';
-  xhr.onload = function() {
-    var reader  = new FileReader();
-    reader.onloadend = function () {
-      callback(null, reader.result);
-    }
-    reader.readAsDataURL(xhr.response);
-  };
-  xhr.open('GET', fileUrl);
-  xhr.send();
+  Meteor.call("lmImagePickerGetFileByUrl", fileUrl, function(err, base64FileData) {
+    callback(null, base64FileData);
+  });
+
+  // Client may be denied permissions due to cross origin
+  // var xhr = new XMLHttpRequest();
+  // xhr.responseType = 'blob';
+  // xhr.onload = function() {
+  //   var reader  = new FileReader();
+  //   reader.onloadend = function () {
+  //     callback(null, reader.result);
+  //   }
+  //   reader.readAsDataURL(xhr.response);
+  // };
+  // xhr.open('GET', fileUrl);
+  // xhr.send();
 };
 
 _imagePicker.isImageExtension =function(src) {
@@ -323,8 +347,16 @@ if(Meteor.isClient) {
       var currentTypes ={
         upload: ( currentType === 'upload' ) ? true : false,
         camera: ( currentType === 'camera' ) ? true : false,
-        byUrl: ( currentType === 'byUrl' ) ? true : false,
+        byUrl: ( currentType === 'byUrl' ) ? true : false
       };
+
+      // Set selected state for type button
+      _imagePicker.opts.classes.btnTypeSelected ={
+        upload: ( currentType === 'upload' ) ? 'selected' : '',
+        camera: ( currentType === 'camera' ) ? 'selected' : '',
+        byUrl: ( currentType === 'byUrl' ) ? 'selected' : ''
+      }
+
       return {
         ids: _imagePicker.formIds(templateInst),
         imageDisplay: _imagePicker.opts.imageDisplay,

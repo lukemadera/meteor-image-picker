@@ -1,14 +1,14 @@
 <template name="lmImagePicker">
   <div class='lm-image-picker-cont'>
-    <div class='lm-image-picker-btns'>
+    <div class='lm-image-picker-btns {{data.classes.btns}}'>
       {{ #if data.types.upload }}
-        <div class='lm-image-picker-btn-upload {{data.classes.btns}}'>Upload</div>
+        <div class='lm-image-picker-btn-upload {{data.classes.btn}} {{data.classes.btnTypeSelected.upload}}'>Upload</div>
       {{ /if }}
       {{ #if data.types.camera }}
-        <div class='lm-image-picker-btn-camera {{data.classes.btns}}'>Camera</div>
+        <div class='lm-image-picker-btn-camera {{data.classes.btn}} {{data.classes.btnTypeSelected.camera}}'>Camera</div>
       {{ /if }}
       {{ #if data.types.byUrl }}
-        <div class='lm-image-picker-btn-by-url {{data.classes.btns}}'>Url</div>
+        <div class='lm-image-picker-btn-by-url {{data.classes.btn}} {{data.classes.btnTypeSelected.byUrl}}'>Url</div>
       {{ /if }}
     </div>
 

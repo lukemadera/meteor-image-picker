@@ -31,6 +31,8 @@ http://www.imagemagick.org/script/binary-releases.php
 
 And / or google the operating system you're trying to install on to get
  instructions.
+E.g. Ubuntu: `sudo apt-get update` then
+ `sudo sudo apt-get install imagemagick libmagickcore-dev libmagickwand-dev`
 
 NOTE: you can NOT install ImageMagick on the free meteor hosting so this will
  NOT work here.
@@ -56,7 +58,8 @@ if(Meteor.isClient) {
     opts: function() {
       var opts ={
         // classes: {
-        //   btns: 'lm-image-picker-btn-style',
+        //   btns: '',
+        //   btn: 'lm-image-picker-btn-style',
         //   image: '',
         //   imageConverted: '',
         //   imageCont: '',
