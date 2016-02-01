@@ -30,8 +30,21 @@ _imagePicker ={
     quality: '75'
   },
   Jcrop: null,
-  imgDisplayData: { }
+  imgDisplayData: { },
+  // One (set) per instance
+  instIds: { }
 };
+
+if(Meteor.isClient) {
+  _imagePicker.onresize =function() {
+    var key;
+    for( key in _imagePicker.instIds ) {
+      _imagePicker.reInitImageDisplay(_imagePicker.instIds[key].templateInst);
+    }
+  };
+
+  window.addEventListener('resize', _imagePicker.onresize);
+}
 
 Meteor.methods({
   lmImagePickerGetFileByUrl: function(fileUrl) {
@@ -109,6 +122,30 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
   else {
     templateInst.processing.set(false);
   }
+};
+
+_imagePicker.reInitImageDisplay =function(templateInst) {
+  if( _imagePicker.Jcrop ) {
+    _imagePicker.Jcrop.destroy();
+  }
+
+  var ids =_imagePicker.formIds(templateInst);
+  var imgEle = document.getElementById(ids.image);
+  var imageUrl =imgEle.src;
+  imgEle.src ='';
+  // Reset styles (that jcrop added?).
+  imgEle.style.width ='100%';
+  imgEle.style.height ='auto';
+
+  // Can not initialize jcrop until image has loaded.
+  var imgEle = document.getElementById(ids.image);
+  imgEle.onload = function() {
+    _imagePicker.imgDisplayData.displayHeight =imgEle.height;
+    _imagePicker.imgDisplayData.displayWidth =imgEle.width;
+    _imagePicker.initJcrop(templateInst, '#'+ids.image);
+    templateInst.processing.set(false);
+  };
+  imgEle.src =imageUrl;
 };
 
 _imagePicker.removeImage =function(templateInst) {
@@ -345,6 +382,15 @@ if(Meteor.isClient) {
     });
     this.processing = new ReactiveVar(null);
     this.instId = new ReactiveVar((Math.random() + 1).toString(36).substring(7));
+    _imagePicker.instIds[this.instId] ={
+      templateInst: this
+    };
+  };
+
+  Template.lmImagePicker.destroyed =function() {
+    if( _imagePicker.instIds[this.instId] ) {
+      delete _imagePicker.instIds[this.instId];
+    }
   };
 
   Template.lmImagePicker.helpers({
