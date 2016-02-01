@@ -52,12 +52,14 @@ if(Meteor.isServer) {
 }
 
 _imagePicker.saveImage =function(templateInst) {
+  templateInst.processing.set(true);
   var imageData = templateInst.imageData.get();
   Meteor.call("lmImagePickerConvertImage", imageData, function(err, base64Data) {
     if(_imagePicker.opts.onImageSaved) {
       _imagePicker.opts.onImageSaved(null, base64Data);
     }
     _imagePicker.resetImage(templateInst);
+    templateInst.processing.set(false);
   });
 };
 
@@ -100,8 +102,12 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
       _imagePicker.imgDisplayData.displayHeight =imgEle.height;
       _imagePicker.imgDisplayData.displayWidth =imgEle.width;
       _imagePicker.initJcrop(templateInst, '#'+ids.image);
+      templateInst.processing.set(false);
     };
     imgEle.src =imageUrl;
+  }
+  else {
+    templateInst.processing.set(false);
   }
 };
 
@@ -290,7 +296,7 @@ _imagePicker.isImageExtension =function(src) {
     }
     if(!match) {
       ret.valid = false;
-      ret.message = "jpg, .jpeg, .png, .gif files only please";
+      ret.message = ".jpg, .jpeg, .png, .gif files only please";
     }
   }
   return ret;
@@ -323,6 +329,7 @@ _imagePicker.resetImage =function(templateInst) {
   templateInst.currentType.set(null);
   templateInst.errorByUrl.set(null);
   templateInst.errorUpload.set(null);
+  templateInst.processing.set(null);
   _imagePicker.removeImage(templateInst);
 };
 
@@ -336,6 +343,7 @@ if(Meteor.isClient) {
     this.imageData = new ReactiveVar({
       src: null
     });
+    this.processing = new ReactiveVar(null);
     this.instId = new ReactiveVar((Math.random() + 1).toString(36).substring(7));
   };
 
@@ -367,7 +375,8 @@ if(Meteor.isClient) {
         showUploadInput: ( currentTypes.upload && !Meteor.isCordova ) ?
          true : false,
         errorUpload: templateInst.errorUpload.get(),
-        imageData: templateInst.imageData.get()
+        imageData: templateInst.imageData.get(),
+        processing: templateInst.processing.get()
       };
     }
   });
@@ -382,6 +391,7 @@ if(Meteor.isClient) {
           sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY
         };
         MeteorCamera.getPicture(picOpts, function(err, data) {
+          templateInst.processing.set(true);
           _imagePicker.showImage(templateInst, data);
         });
       }
@@ -400,6 +410,7 @@ if(Meteor.isClient) {
       }
       else {
         var file =evt.target.files[0];
+        templateInst.processing.set(true);
         _imagePicker.readFileChunksToBase64(file, file.type, function(data) {
           _imagePicker.showImage(templateInst, data);
         });
@@ -412,6 +423,7 @@ if(Meteor.isClient) {
       // Need to set orienation for Android:
       // https://github.com/meteor/mobile-packages/issues/21
       MeteorCamera.getPicture({ correctOrientation: true }, function(err, data) {
+        templateInst.processing.set(true);
         _imagePicker.showImage(templateInst, data);
       });
     },
@@ -431,6 +443,7 @@ if(Meteor.isClient) {
         template.errorByUrl.set(validate.message);
       }
       else {
+        templateInst.processing.set(true);
         _imagePicker.fileUrlToBase64(val, function(err, data) {
           _imagePicker.showImage(templateInst, data);
         });
