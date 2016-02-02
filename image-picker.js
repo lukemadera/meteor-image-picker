@@ -1,7 +1,6 @@
 lmImagePicker ={};
 
 _imagePicker ={
-  opts: {},
   optsDefaults: {
     classes: {
       btns: '',
@@ -27,19 +26,24 @@ _imagePicker ={
       height: 800
     },
     fileDir: '',
-    quality: '75'
+    quality: '75',
+    displayMax: {
+      height: '75%'
+    }
   },
+  opts: {},
   Jcrop: null,
   imgDisplayData: { },
   // One (set) per instance
-  instIds: { }
+  instIds: {
+  }
 };
 
 if(Meteor.isClient) {
   _imagePicker.onresize =function() {
     var key;
     for( key in _imagePicker.instIds ) {
-      _imagePicker.reInitImageDisplay(_imagePicker.instIds[key].templateInst);
+      _imagePicker.reInitImageDisplay(_imagePicker.instIds[key].templateInst, true);
     }
   };
 
@@ -79,6 +83,8 @@ _imagePicker.saveImage =function(templateInst) {
 _imagePicker.showImage =function(templateInst, imageUrl) {
   var imageData =templateInst.imageData.get();
   if( imageData.src !== imageUrl ) {
+    _imagePicker.setDisplayMax(templateInst);
+
     var ids =_imagePicker.formIds(templateInst);
 
     // Need to load a SECOND image that has NO set height and width
@@ -112,10 +118,17 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
     // Can not initialize jcrop until image has loaded.
     var imgEle = document.getElementById(ids.image);
     imgEle.onload = function() {
-      _imagePicker.imgDisplayData.displayHeight =imgEle.height;
-      _imagePicker.imgDisplayData.displayWidth =imgEle.width;
-      _imagePicker.initJcrop(templateInst, '#'+ids.image);
-      templateInst.processing.set(false);
+      // Need to check if too big. May need to re-init.
+      var retDisplay =_imagePicker.setDisplayMax(templateInst);
+      if(retDisplay.reInit) {
+        _imagePicker.reInitImageDisplay(templateInst, false);
+      }
+      else {
+        _imagePicker.imgDisplayData.displayHeight =imgEle.height;
+        _imagePicker.imgDisplayData.displayWidth =imgEle.width;
+        _imagePicker.initJcrop(templateInst, '#'+ids.image);
+        templateInst.processing.set(false);
+      }
     };
     imgEle.src =imageUrl;
   }
@@ -124,19 +137,47 @@ _imagePicker.showImage =function(templateInst, imageUrl) {
   }
 };
 
-_imagePicker.reInitImageDisplay =function(templateInst) {
+_imagePicker.setDisplayMax =function(templateInst) {
+  var ret ={
+    reInit: false,
+    displayMax: { }
+  };
+  var instId =templateInst.instId;
+  var rules =_imagePicker.opts.displayMax;
+  var displayMax ={
+    height: ( rules.height.indexOf('%') > -1 ) ?
+     ( Math.floor( ( parseInt(rules.height, 10) / 100 ) * window.innerHeight ) ) : rules.height
+  };
+  var ids =_imagePicker.formIds(templateInst);
+  var imgEle = document.getElementById(ids.image);
+  if( imgEle.offsetHeight > displayMax.height ) {
+    // Do NOT want to set height as it may mess with the aspect ratio.
+    // Set width instead to a proportional amount of the new height.
+    // imgEle.style.height = displayMax.height + 'px';
+    displayMax.width = Math.floor ( imgEle.offsetWidth * ( displayMax.height /
+     imgEle.offsetHeight ) );
+    imgEle.style.width = displayMax.width + 'px';
+    ret.reInit = true;
+  }
+  ret.displayMax =displayMax;
+  return ret;
+}
+
+_imagePicker.reInitImageDisplay =function(templateInst, reInitImageDimensions) {
   if( _imagePicker.Jcrop ) {
     _imagePicker.Jcrop.destroy();
   }
-
   var ids =_imagePicker.formIds(templateInst);
   var imgEle = document.getElementById(ids.image);
   var imageUrl =imgEle.src;
-  imgEle.src ='';
   // Reset styles (that jcrop added?).
-  imgEle.style.width ='100%';
-  imgEle.style.height ='auto';
+  if( reInitImageDimensions ) {
+    imgEle.style.width ='100%';
+    imgEle.style.height ='auto';
+  }
+  _imagePicker.setDisplayMax(templateInst);
 
+  imgEle.src ='';
   // Can not initialize jcrop until image has loaded.
   var imgEle = document.getElementById(ids.image);
   imgEle.onload = function() {

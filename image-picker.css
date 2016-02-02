@@ -1,3 +1,8 @@
+.lm-image-picker-image-cont .jcrop-holder {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .lm-image-picker-cont {
   position: relative;
 }
