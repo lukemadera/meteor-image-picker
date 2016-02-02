@@ -80,6 +80,9 @@ if(Meteor.isClient) {
         // },
         // fileDir: '',
         // quality: '75',
+        // displayMax: {
+        //   height: '75%'
+        // },
         onImageSaved: function(err, base64Data) {
           console.log(err, base64Data);
         }
