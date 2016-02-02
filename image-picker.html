@@ -1,12 +1,6 @@
 <template name="lmImagePicker">
   <div class='lm-image-picker-cont'>
 
-    {{ #if data.processing }}
-      <div class='lm-image-picker-processing'>
-        Image is loading.. Thanks for being patient.
-      </div>
-    {{ /if }}
-
     <div class='lm-image-picker-btns {{data.classes.btns}}'>
       {{ #if data.types.upload }}
         <div class='lm-image-picker-btn-upload {{data.classes.btn}} {{data.classes.btnTypeSelected.upload}}'>Upload</div>
@@ -35,6 +29,12 @@
         {{ #if data.errorByUrl }}
           <div class='lm-image-picker-by-url-error'>{{ data.errorByUrl }}</div>
         {{ /if }}
+      </div>
+    {{ /if }}
+
+    {{ #if data.processing }}
+      <div class='lm-image-picker-processing'>
+        Loading.. Thanks for being patient.
       </div>
     {{ /if }}
 

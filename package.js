@@ -1,6 +1,6 @@
 Package.describe({
   name: 'lukemadera:image-picker',
-  version: '0.0.8',
+  version: '1.0.0',
   summary: 'Image crop & resize from camera (capture), file upload or by URL, cross platform (Web, Cordova)',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/lukemadera/meteor-image-picker',
