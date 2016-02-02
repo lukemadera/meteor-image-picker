@@ -8,7 +8,7 @@
 }
 .lm-image-picker-processing {
   position: absolute;
-  z-index: 99;
+  z-index: 999;
   width: 100%;
   height: 100%;
   background-color: white;
