@@ -1,6 +1,6 @@
 Package.describe({
   name: 'lukemadera:image-picker',
-  version: '1.0.0',
+  version: '1.0.1',
   summary: 'Image crop & resize from camera (capture), file upload or by URL, cross platform (Web, Cordova)',
   // URL to the Git repository containing the source code for this package.
   git: 'https://github.com/lukemadera/meteor-image-picker',
@@ -18,6 +18,7 @@ Package.onUse(function(api) {
   api.use('mdg:camera@1.2.0');
   api.use('classcraft:imagemagick@0.9.1');
   api.use('http');
+  api.use('mdg:camera@1.2.0');
 
   api.addFiles([
     'lib/Jcrop/jquery.Jcrop.min.css',
